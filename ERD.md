@@ -13,6 +13,20 @@ erDiagram
     BOOK ||--o{ BORROW_RECORD : "is borrowed in"
     STUDENT ||--o{ BORROW_RECORD : "creates"
 
+    USER ||--o{ LOGIN_PROCESS : "performs"
+    USER ||--o{ STUDENT_DASHBOARD_PROCESS : "accesses if student"
+    USER ||--o{ LIBRARIAN_DASHBOARD_PROCESS : "accesses if librarian"
+    STUDENT ||--o{ BOOK_CATALOG_PROCESS : "browses"
+    STUDENT ||--o{ BORROW_PROCESS : "performs"
+    STUDENT ||--o{ RETURN_PROCESS : "performs"
+    BOOK ||--o{ BORROW_PROCESS : "involved in"
+    BORROW_RECORD ||--o{ BORROW_PROCESS : "created in"
+    BORROW_RECORD ||--o{ RETURN_PROCESS : "updated in"
+    USER ||--o{ MANAGE_BOOKS_PROCESS : "performs if librarian"
+    USER ||--o{ USER_MANAGEMENT_PROCESS : "performs if librarian"
+    BOOK ||--o{ MANAGE_BOOKS_PROCESS : "managed in"
+    STUDENT ||--o{ USER_MANAGEMENT_PROCESS : "viewed in"
+
     USER {
         string id PK "User primary key"
         string name
@@ -65,6 +79,126 @@ erDiagram
         date return_date
         string status "borrowed, overdue, returned"
     }
+
+    LOGIN_PROCESS {
+        string description "authentication process"
+    }
+
+    STUDENT_DASHBOARD_PROCESS {
+        string description "student main page"
+    }
+
+    LIBRARIAN_DASHBOARD_PROCESS {
+        string description "librarian main page"
+    }
+
+    BOOK_CATALOG_PROCESS {
+        string description "browse and search books"
+    }
+
+    BORROW_PROCESS {
+        string description "borrow book process"
+    }
+
+    RETURN_PROCESS {
+        string description "return book process"
+    }
+
+    MANAGE_BOOKS_PROCESS {
+        string description "add, edit, delete books"
+    }
+
+    USER_MANAGEMENT_PROCESS {
+        string description "view student borrowing history"
+    }
+```
+
+## Process Flow Diagrams
+
+### Overall System Flow
+
+```mermaid
+flowchart TD
+    A[User Opens App] --> B[Load Login Page /]
+    B --> C[User Enters Credentials]
+    C --> D{Validate Credentials}
+    D -->|Invalid| E[Show Error on Login Page]
+    E --> C
+    D -->|Valid| F{Determine User Role}
+    F -->|Student| G[Navigate to /student]
+    F -->|Librarian| H[Navigate to /admin]
+    G --> I[Student Dashboard]
+    H --> J[Admin Panel]
+    I --> K[Student Actions]
+    J --> L[Librarian Actions]
+    K --> M[Logout]
+    L --> M
+    M --> N[Return to Login Page]
+```
+
+### Student Process Flow
+
+```mermaid
+flowchart TD
+    A[Student Dashboard /student] --> B{User Action}
+    B -->|Browse Catalog| C[Navigate to /student/catalog]
+    B -->|View Borrowed Books| D[Navigate to /student/borrowed]
+    B -->|Search/Filter Books| E[Book Catalog Page]
+    C --> E
+    E --> F{Select Book?}
+    F -->|Yes| G[Navigate to /student/book/:id]
+    F -->|No| A
+    G --> H[Book Details Page]
+    H --> I{Action on Book}
+    I -->|Borrow Book| J{Check Availability}
+    I -->|Back to Catalog| E
+    J -->|Available| K[Create Borrow Record]
+    J -->|Not Available| L[Show Unavailable Message]
+    L --> H
+    K --> M[Update Book Copies]
+    M --> N[Show Success Message]
+    N --> A
+    D --> O[Borrowed Books Page]
+    O --> P{Select Record}
+    P -->|Return Book| Q[Update Record Status]
+    P -->|No| A
+    Q --> R[Update Book Copies]
+    R --> S[Show Return Success]
+    S --> A
+```
+
+### Librarian Process Flow
+
+```mermaid
+flowchart TD
+    A[Admin Panel /admin] --> B{User Action}
+    B -->|Manage Books| C[Book Management Section]
+    B -->|View Users| D[Navigate to /admin/users]
+    B -->|Browse Catalog| E[Navigate to /admin/catalog]
+    C --> F{Book Operation}
+    F -->|Add Book| G[Add New Book Form]
+    F -->|Edit Book| H[Edit Book Form]
+    F -->|Delete Book| I[Confirm Delete]
+    G --> J[Save Book to Database]
+    H --> J
+    I --> K[Remove Book from Database]
+    J --> L[Update Book List]
+    K --> L
+    L --> A
+    D --> M[User Management Page]
+    M --> N{Select User}
+    N -->|Yes| O[View User Details & History]
+    N -->|No| A
+    O --> P[View Borrowing Records]
+    P --> A
+    E --> Q[Book Catalog Page]
+    Q --> R{Select Book}
+    R -->|Yes| S[Navigate to /admin/book/:id]
+    R -->|No| A
+    S --> T[Book Details Page]
+    T --> U{Action}
+    U -->|Edit Book| H
+    U -->|Back| Q
 ```
 
 ## Entity Descriptions
@@ -93,6 +227,30 @@ erDiagram
 - `BORROW_RECORD`
   - Tracks each borrowing transaction between a student and a book.
   - The status field maintains the lifecycle: `borrowed`, `overdue`, or `returned`.
+
+- `LOGIN_PROCESS`
+  - The authentication process where users enter credentials to access the system.
+
+- `STUDENT_DASHBOARD_PROCESS`
+  - The main dashboard for students showing borrowed books, available books, and navigation options.
+
+- `LIBRARIAN_DASHBOARD_PROCESS`
+  - The main dashboard for librarians showing book statistics, overdue books, and management options.
+
+- `BOOK_CATALOG_PROCESS`
+  - The process of browsing, searching, and filtering the book catalog.
+
+- `BORROW_PROCESS`
+  - The process of borrowing a book, including checking availability and creating borrow records.
+
+- `RETURN_PROCESS`
+  - The process of returning a borrowed book, updating records and availability.
+
+- `MANAGE_BOOKS_PROCESS`
+  - The process for librarians to add, edit, or delete books in the catalog.
+
+- `USER_MANAGEMENT_PROCESS`
+  - The process for librarians to view student information and borrowing histories.
 
 ## Normalization Notes (1NF, 2NF, 3NF, 4NF)
 
