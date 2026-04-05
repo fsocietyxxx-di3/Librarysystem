@@ -5,15 +5,17 @@ It includes the authentication flow, student and librarian processes, and a Merm
 
 ## Mermaid Crow's Foot ERD
 
-### Core Data Model
+### Authentication / Login
 
 ```mermaid
 erDiagram
-    USER ||--o{ STUDENT : "may represent"
     ROLE ||--o{ USER : "assigns"
-    GENRE ||--o{ BOOK : "categorizes"
-    BOOK ||--o{ BORROW_RECORD : "is borrowed in"
-    STUDENT ||--o{ BORROW_RECORD : "creates"
+    USER ||--o{ LOGIN_PROCESS : "performs"
+
+    ROLE {
+        string id PK
+        string name "student or librarian"
+    }
 
     USER {
         string id PK
@@ -24,10 +26,25 @@ erDiagram
         string password_hash
     }
 
-    ROLE {
+    LOGIN_PROCESS {
         string id PK
-        string name "student or admin"
+        string email_input
+        string password_input
+        date_time login_time
+        string result "success or failure"
     }
+```
+
+### Student Interaction
+
+```mermaid
+erDiagram
+    USER ||--o{ STUDENT : "may represent"
+    STUDENT ||--o{ BORROW_RECORD : "creates"
+    BOOK ||--o{ BORROW_RECORD : "is borrowed in"
+    STUDENT ||--o{ BOOK_CATALOG_PROCESS : "browses"
+    STUDENT ||--o{ BORROW_PROCESS : "performs"
+    STUDENT ||--o{ RETURN_PROCESS : "performs"
 
     STUDENT {
         string id PK
@@ -37,11 +54,6 @@ erDiagram
         string grade
         date join_date
         string initials
-    }
-
-    GENRE {
-        string id PK
-        string name
     }
 
     BOOK {
@@ -67,126 +79,53 @@ erDiagram
         date return_date
         string status "borrowed, overdue, returned"
     }
+
+    BOOK_CATALOG_PROCESS {
+        string id PK
+        string filters
+        string search_terms
+    }
+
+    BORROW_PROCESS {
+        string id PK
+        date borrow_time
+        string status "pending or completed"
+    }
+
+    RETURN_PROCESS {
+        string id PK
+        date return_time
+        string status "completed"
+    }
 ```
 
-### Authentication & Role Routing
+### Librarian Interaction
 
 ```mermaid
-flowchart LR
-    LOGIN[Login Page] --> AUTH{Validate Credentials}
-    AUTH -->|Valid student| STUDENT[Student Dashboard]
-    AUTH -->|Valid librarian| LIBRARIAN[Librarian Dashboard]
-    AUTH -->|Invalid| ERROR[Show Login Error]
-    STUDENT --> STUDENT_ACTIONS[Student Pages]
-    LIBRARIAN --> LIBRARIAN_ACTIONS[Librarian Pages]
-```
+erDiagram
+    ROLE ||--o{ USER : "assigns"
+    USER ||--o{ MANAGE_BOOKS_PROCESS : "performs"
+    USER ||--o{ USER_MANAGEMENT_PROCESS : "performs"
+    BOOK ||--o{ MANAGE_BOOKS_PROCESS : "is managed in"
+    STUDENT ||--o{ USER_MANAGEMENT_PROCESS : "is viewed in"
 
-### Student and Librarian Access
+    MANAGE_BOOKS_PROCESS {
+        string id PK
+        string action "add, edit, delete"
+        date_time action_time
+    }
 
-```mermaid
-flowchart TB
-    STUDENT[Student Dashboard] --> CATALOG[Book Catalog]
-    STUDENT --> BORROWED[Borrowed Books]
-    STUDENT --> PROFILE[Student Profile]
-
-    LIBRARIAN[Librarian Dashboard] --> MANAGE_BOOKS[Manage Books]
-    LIBRARIAN --> USERS[User Management]
-    LIBRARIAN --> LIB_CATALOG[Book Catalog]
-```
-
-## Process Flow Diagrams
-
-### Overall System Flow
-
-```mermaid
-flowchart TD
-    A[User Opens App] --> B[Load Login Page /]
-    B --> C[User Enters Credentials]
-    C --> D{Validate Credentials}
-    D -->|Invalid| E[Show Error on Login Page]
-    E --> C
-    D -->|Valid| F{Determine User Role}
-    F -->|Student| G[Navigate to /student]
-    F -->|Librarian| H[Navigate to /admin]
-    G --> I[Student Dashboard]
-    H --> J[Admin Panel]
-    I --> K[Student Actions]
-    J --> L[Librarian Actions]
-    K --> M[Logout]
-    L --> M
-    M --> N[Return to Login Page]
-```
-
-### Student Process Flow
-
-```mermaid
-flowchart TD
-    A[Student Dashboard /student] --> B{User Action}
-    B -->|Browse Catalog| C[Navigate to /student/catalog]
-    B -->|View Borrowed Books| D[Navigate to /student/borrowed]
-    B -->|Search/Filter Books| E[Book Catalog Page]
-    C --> E
-    E --> F{Select Book?}
-    F -->|Yes| G[Navigate to /student/book/:id]
-    F -->|No| A
-    G --> H[Book Details Page]
-    H --> I{Action on Book}
-    I -->|Borrow Book| J{Check Availability}
-    I -->|Back to Catalog| E
-    J -->|Available| K[Create Borrow Record]
-    J -->|Not Available| L[Show Unavailable Message]
-    L --> H
-    K --> M[Update Book Copies]
-    M --> N[Show Success Message]
-    N --> A
-    D --> O[Borrowed Books Page]
-    O --> P{Select Record}
-    P -->|Return Book| Q[Update Record Status]
-    P -->|No| A
-    Q --> R[Update Book Copies]
-    R --> S[Show Return Success]
-    S --> A
-```
-
-### Librarian Process Flow
-
-```mermaid
-flowchart TD
-    A[Admin Panel /admin] --> B{User Action}
-    B -->|Manage Books| C[Book Management Section]
-    B -->|View Users| D[Navigate to /admin/users]
-    B -->|Browse Catalog| E[Navigate to /admin/catalog]
-    C --> F{Book Operation}
-    F -->|Add Book| G[Add New Book Form]
-    F -->|Edit Book| H[Edit Book Form]
-    F -->|Delete Book| I[Confirm Delete]
-    G --> J[Save Book to Database]
-    H --> J
-    I --> K[Remove Book from Database]
-    J --> L[Update Book List]
-    K --> L
-    L --> A
-    D --> M[User Management Page]
-    M --> N{Select User}
-    N -->|Yes| O[View User Details & History]
-    N -->|No| A
-    O --> P[View Borrowing Records]
-    P --> A
-    E --> Q[Book Catalog Page]
-    Q --> R{Select Book}
-    R -->|Yes| S[Navigate to /admin/book/:id]
-    R -->|No| A
-    S --> T[Book Details Page]
-    T --> U{Action}
-    U -->|Edit Book| H
-    U -->|Back| Q
+    USER_MANAGEMENT_PROCESS {
+        string id PK
+        string action "view or filter"
+        date_time action_time
+    }
 ```
 
 ## Entity Descriptions
 
 - `USER`
   - Represents application accounts used for login and role selection.
-  - In the current code, demo login uses `student@school.edu` and `librarian@school.edu` with `password123`.
   - The `role_id` connects to `ROLE` for student or librarian access.
 
 - `ROLE`
