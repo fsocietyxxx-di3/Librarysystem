@@ -5,6 +5,8 @@ It includes the authentication flow, student and librarian processes, and a Merm
 
 ## Mermaid Crow's Foot ERD
 
+### Core Data Model
+
 ```mermaid
 erDiagram
     USER ||--o{ STUDENT : "may represent"
@@ -13,27 +15,13 @@ erDiagram
     BOOK ||--o{ BORROW_RECORD : "is borrowed in"
     STUDENT ||--o{ BORROW_RECORD : "creates"
 
-    USER ||--o{ LOGIN_PROCESS : "performs"
-    USER ||--o{ STUDENT_DASHBOARD_PROCESS : "accesses if student"
-    USER ||--o{ LIBRARIAN_DASHBOARD_PROCESS : "accesses if librarian"
-    STUDENT ||--o{ BOOK_CATALOG_PROCESS : "browses"
-    STUDENT ||--o{ BORROW_PROCESS : "performs"
-    STUDENT ||--o{ RETURN_PROCESS : "performs"
-    BOOK ||--o{ BORROW_PROCESS : "involved in"
-    BORROW_RECORD ||--o{ BORROW_PROCESS : "created in"
-    BORROW_RECORD ||--o{ RETURN_PROCESS : "updated in"
-    USER ||--o{ MANAGE_BOOKS_PROCESS : "performs if librarian"
-    USER ||--o{ USER_MANAGEMENT_PROCESS : "performs if librarian"
-    BOOK ||--o{ MANAGE_BOOKS_PROCESS : "managed in"
-    STUDENT ||--o{ USER_MANAGEMENT_PROCESS : "viewed in"
-
     USER {
-        string id PK "User primary key"
+        string id PK
         string name
         string email "unique login email"
         string role_id FK
         string initials
-        string password_hash "demo password in real app"
+        string password_hash
     }
 
     ROLE {
@@ -42,8 +30,8 @@ erDiagram
     }
 
     STUDENT {
-        string id PK "student profile key"
-        string user_id FK "optional user account link"
+        string id PK
+        string user_id FK
         string name
         string email
         string grade
@@ -79,38 +67,31 @@ erDiagram
         date return_date
         string status "borrowed, overdue, returned"
     }
+```
 
-    LOGIN_PROCESS {
-        string description "authentication process"
-    }
+### Authentication & Role Routing
 
-    STUDENT_DASHBOARD_PROCESS {
-        string description "student main page"
-    }
+```mermaid
+flowchart LR
+    LOGIN[Login Page] --> AUTH{Validate Credentials}
+    AUTH -->|Valid student| STUDENT[Student Dashboard]
+    AUTH -->|Valid librarian| LIBRARIAN[Librarian Dashboard]
+    AUTH -->|Invalid| ERROR[Show Login Error]
+    STUDENT --> STUDENT_ACTIONS[Student Pages]
+    LIBRARIAN --> LIBRARIAN_ACTIONS[Librarian Pages]
+```
 
-    LIBRARIAN_DASHBOARD_PROCESS {
-        string description "librarian main page"
-    }
+### Student and Librarian Access
 
-    BOOK_CATALOG_PROCESS {
-        string description "browse and search books"
-    }
+```mermaid
+flowchart TB
+    STUDENT[Student Dashboard] --> CATALOG[Book Catalog]
+    STUDENT --> BORROWED[Borrowed Books]
+    STUDENT --> PROFILE[Student Profile]
 
-    BORROW_PROCESS {
-        string description "borrow book process"
-    }
-
-    RETURN_PROCESS {
-        string description "return book process"
-    }
-
-    MANAGE_BOOKS_PROCESS {
-        string description "add, edit, delete books"
-    }
-
-    USER_MANAGEMENT_PROCESS {
-        string description "view student borrowing history"
-    }
+    LIBRARIAN[Librarian Dashboard] --> MANAGE_BOOKS[Manage Books]
+    LIBRARIAN --> USERS[User Management]
+    LIBRARIAN --> LIB_CATALOG[Book Catalog]
 ```
 
 ## Process Flow Diagrams
