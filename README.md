@@ -1,7 +1,7 @@
 
-  # Untitled
-
-  This is a code bundle for Untitled. The original project is available at https://www.figma.com/design/NgCBZi0g7CHqbweBq1WMiv/Untitled.
+  # Testing
+  For School purposes still open source
+  
 
   ## Running the code
 
