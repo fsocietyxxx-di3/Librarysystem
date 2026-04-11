@@ -25,15 +25,9 @@ export function LoginPage() {
         navigate('/student');
       }
     } else {
-      setError('Invalid credentials. Please use the demo accounts below.');
+      setError('Invalid credentials. Please try again.');
     }
     setLoading(false);
-  };
-
-  const fillDemo = (type: 'student' | 'librarian') => {
-    setEmail(type === 'student' ? 'student@school.edu' : 'librarian@school.edu');
-    setPassword('password123');
-    setError('');
   };
 
   return (
@@ -102,30 +96,6 @@ export function LoginPage() {
 
           <h2 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h2>
           <p className="text-gray-500 text-sm mb-6">Sign in to access your library account</p>
-
-          {/* Demo accounts */}
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6">
-            <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-3">Quick Demo Access</p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => fillDemo('student')}
-                className="flex flex-col items-center gap-1 bg-white border border-blue-200 rounded-xl px-3 py-3 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors group text-left"
-              >
-                <div className="text-lg">🎓</div>
-                <div className="text-xs font-semibold text-gray-800 group-hover:text-white">Student</div>
-                <div className="text-gray-400 group-hover:text-blue-100" style={{ fontSize: '10px' }}>Alex Johnson</div>
-              </button>
-              <button
-                onClick={() => fillDemo('librarian')}
-                className="flex flex-col items-center gap-1 bg-white border border-amber-200 rounded-xl px-3 py-3 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-colors group text-left"
-              >
-                <div className="text-lg">🔑</div>
-                <div className="text-xs font-semibold text-gray-800 group-hover:text-white">Librarian</div>
-                <div className="text-gray-400 group-hover:text-amber-100" style={{ fontSize: '10px' }}>Mrs. Sarah Smith</div>
-              </button>
-            </div>
-            <p className="text-gray-400 text-center mt-2" style={{ fontSize: '10px' }}>Password: password123</p>
-          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
